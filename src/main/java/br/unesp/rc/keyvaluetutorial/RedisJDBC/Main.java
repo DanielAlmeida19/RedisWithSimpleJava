@@ -1,24 +1,25 @@
 package br.unesp.rc.keyvaluetutorial.RedisJDBC;
 
-import io.lettuce.core.RedisClient;
-import io.lettuce.core.api.StatefulRedisConnection;
-import io.lettuce.core.api.sync.RedisCommands;
+import br.unesp.rc.keyvaluetutorial.RedisJDBC.model.User;
+import br.unesp.rc.keyvaluetutorial.RedisJDBC.repository.UserRepository;
+import br.unesp.rc.keyvaluetutorial.RedisJDBC.utils.RedisClientManager;
 
 public class Main {
     public static void main(String[] args) {
-        RedisClient redisClient = RedisClient.create("redis://localhost:6379");
-        StatefulRedisConnection<String, String> connection = redisClient.connect();
+        
+        UserRepository repository = new UserRepository();
 
-        System.out.println("Connected to Redis");
+        User user = new User("123", "Daniel", 22);
+        repository.save(user);
 
-        RedisCommands<String, String> commands = connection.sync();
-        commands.set("Name", "Daniel");
+        User userFound = repository.findById("123");
+        System.out.println(userFound.getName());
 
-        String value = commands.get("Name");
+        System.out.println("Exists? " + repository.exists("123"));
 
-        System.out.println(value);
+        repository.delete("123");
+        System.out.println("Exists after deletion? " + repository.exists("123"));
 
-        connection.close();
-        redisClient.shutdown();
+        RedisClientManager.shutdown();
     }
 }
